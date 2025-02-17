@@ -1,0 +1,17 @@
+numpy
+scipy
+tqdm
+docopt
+nltk
+torchvision
+torch
+sentencepiece
+lxml
+sacrebleu
+tensorboard
+transformers
+datasets
+accelerate
+bitsandbytes
+peft
+huggingface_hub[cli]

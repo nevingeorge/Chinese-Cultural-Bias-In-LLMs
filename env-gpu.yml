@@ -1,0 +1,9 @@
+name: cs224n-project
+channels:
+  - defaults
+  - nvidia
+dependencies:
+  - python==3.10
+  - pip
+  - pip:
+    - -r requirements.txt
