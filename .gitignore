@@ -1,0 +1,40 @@
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Python compiled files
+__pycache__/
+*.py[cod]
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore node_modules (for JavaScript/Node.js projects)
+node_modules/
+
+# Ignore environment files
+.env
+.env.local
+
+# Ignore build artifacts
+/dist/
+/build/
+
+# Ignore dependencies
+vendor/
+
+# Ignore IDE and editor config files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Ignore compiled binaries
+*.o
+*.so
+*.exe
+*.dll
+
+# Ignore package managers lock files (optional based on project preference)
+package-lock.json
+yarn.lock
+poetry.lock
