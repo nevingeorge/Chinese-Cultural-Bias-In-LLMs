@@ -10,7 +10,7 @@ VALID_CATEGORIES = ('AUTHOR', 'BEVERAGE', 'CLOTHING', 'FOOD',
 
 CULTURE = 'EN'
 CATEGORY = 'LOCATION'
-WRITE_XLSX = False
+WRITE_XLSX = True
 
 ###################
 
