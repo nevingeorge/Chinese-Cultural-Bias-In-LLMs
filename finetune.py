@@ -1,6 +1,3 @@
-# Install required libraries if not installed
-# !pip install transformers datasets torch accelerate bitsandbytes peft tqdm
-
 import torch
 import os
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer, TrainerCallback
