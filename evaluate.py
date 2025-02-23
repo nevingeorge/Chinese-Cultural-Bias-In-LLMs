@@ -4,24 +4,18 @@ from peft import PeftModel, PeftConfig
 import torch
 import argparse
 from tqdm import tqdm
+import re
 
 def extract_number_from_response(response):
     # Extract the first number from the model's response
-    for char in response:
-        if char.isdigit():
-            return int(char)
+    numbers = re.findall(r'\d+', response)
+    if len(numbers) == 0:
+        return None
+    return int(numbers[0])
         
 def extract_first_two_numbers(prompt):
-    starting_choice, ending_choice = 0, 5
-    found_starting = False
-    for c in prompt:
-        if (not found_starting) and c.isdigit():
-            starting_choice = int(c)
-            found_starting = True
-        elif c.isdigit():
-            ending_choice = int(c)
-            break
-    return starting_choice, ending_choice
+    numbers = re.findall(r'\d+', prompt)
+    return int(numbers[0]), int(numbers[1])
 
 def extract_from_input(line):
     data = json.loads(line.strip())
