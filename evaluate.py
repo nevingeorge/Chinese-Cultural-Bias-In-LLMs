@@ -71,10 +71,9 @@ def load_model(model_type, model_path):
             device_map="auto"
         )
             
-        tokenizer = AutoTokenizer.from_pretrained(peft_config.base_model_name_or_path)
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
         
-        model = PeftModel.from_pretrained(base_model, model_path)
-        model = model.merge_and_unload()
+        model = PeftModel.from_pretrained(base_model, model_path, is_trainable=False)
         
         pipe = pipeline(
             "text-generation",
@@ -82,11 +81,6 @@ def load_model(model_type, model_path):
             tokenizer=tokenizer,
             torch_dtype=torch.bfloat16,
             device_map="auto",
-            max_new_tokens=20,
-            temperature=0.7,
-            do_sample=True,
-            pad_token_id=2,
-            eos_token_id=2,
         )
 
     return pipe
