@@ -74,6 +74,7 @@ def load_model(model_type, model_path):
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         
         model = PeftModel.from_pretrained(base_model, model_path, is_trainable=False)
+        model = model.merge_and_unload()
         
         pipe = pipeline(
             "text-generation",
