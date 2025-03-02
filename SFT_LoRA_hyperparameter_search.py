@@ -79,7 +79,7 @@ for lora_config in lora_configurations:
 
     print("Finished fine-tuning. Beginning evaluation...")
 
-    model = trainer.model
+    model = trainer.model.merge_and_unload()
     tokenizer = trainer.tokenizer
 
     pipe = pipeline(
