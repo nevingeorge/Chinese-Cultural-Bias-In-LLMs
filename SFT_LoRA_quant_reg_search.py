@@ -17,52 +17,52 @@ import SAR
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
 dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
 
-# quantization, SAR
-options = [[0,0], [1,0], [0,1], [1,1]]
+# LoRA, quantization, SAR
+# options = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [1,0,1], [0,1,1], [1,1,1]]
+options = [[1,0,0]]
 
 with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
     for option in options:
-        print("Option (quantization, SAR):", option)
-        file.write(f"Setting (quantization, SAR): {option}\n")
-
-        compute_dtype = getattr(torch, "float16")
-
-        quant_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=compute_dtype,
-            bnb_4bit_use_double_quant=False,
-        )
+        print("Option (LoRA, quantization, SAR):", option)
+        file.write(f"Setting (LoRA, quantization, SAR): {option}\n")
 
         max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
-        model = LlamaForCausalLM.from_pretrained(
-            base_model,
-            quantization_config=quant_config,
-            device_map="auto",
-            max_memory=max_memory
-        )
-        model.quantization_config = quant_config
+
+        if option[1]: # use quantization
+            compute_dtype = getattr(torch, "float16")
+
+            quant_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=compute_dtype,
+                bnb_4bit_use_double_quant=False,
+            )
+
+            max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
+            model = LlamaForCausalLM.from_pretrained(
+                base_model,
+                quantization_config=quant_config,
+                device_map="auto",
+                max_memory=max_memory
+            )
+        else:
+            model = LlamaForCausalLM.from_pretrained(
+                base_model,
+                device_map="auto",
+                max_memory=max_memory
+            )
         model.config.use_cache = False
 
         tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "right"
 
-        peft_params = LoraConfig(
-            lora_alpha=16,
-            lora_dropout=0.1,
-            r=64,
-            bias="none",
-            task_type="CAUSAL_LM",
-        )
         training_params = TrainingArguments(
             output_dir="./SFT-fine-tune-results",
             num_train_epochs=6,
             per_device_train_batch_size=4,
             gradient_accumulation_steps=1,
             optim="paged_adamw_32bit",
-            save_steps=25,
-            logging_steps=25,
             learning_rate=2e-4,
             weight_decay=0.001,
             fp16=False,
@@ -72,24 +72,66 @@ with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
             warmup_ratio=0.03,
             group_by_length=True,
             lr_scheduler_type="constant",
-            report_to="tensorboard",
+            report_to="none",
+            save_strategy="no",
+            logging_dir=None,
             label_names=[str(i) for i in range(0, 11)]
         )
 
-        trainer = SFTTrainer(
-            model=model,
-            train_dataset=dataset,
-            peft_config=peft_params,
-            tokenizer=tokenizer,
-            args=training_params
+        peft_params = LoraConfig(
+            lora_alpha=32,
+            lora_dropout=0.1,
+            r=16,
+            bias="none",
+            task_type="CAUSAL_LM",
         )
+
+        if option[2]: # Use SAR
+            if option[0]: # Use LoRA
+                trainer = SAR.SARTrainer(
+                    model=model,
+                    train_dataset=dataset,
+                    peft_config=peft_params,
+                    tokenizer=tokenizer,
+                    args=training_params,
+                    epsilon=1e-3,   # Adjust perturbation magnitude
+                    alpha=0.1       # Adjust SAR loss weight
+                )
+            else:
+                trainer = SAR.SARTrainer(
+                    model=model,
+                    train_dataset=dataset,
+                    tokenizer=tokenizer,
+                    args=training_params,
+                    epsilon=1e-3,   # Adjust perturbation magnitude
+                    alpha=0.1       # Adjust SAR loss weight
+                )
+        else:
+            if option[0]: # Use LoRA
+                trainer = SFTTrainer(
+                    model=model,
+                    train_dataset=dataset,
+                    peft_config=peft_params,
+                    tokenizer=tokenizer,
+                    args=training_params
+                )
+            else:
+                trainer = SFTTrainer(
+                    model=model,
+                    train_dataset=dataset,
+                    tokenizer=tokenizer,
+                    args=training_params
+                )
 
         print("Fine-tuning model...")
         trainer.train()
 
         print("Finished fine-tuning. Beginning evaluation...")
 
-        model = trainer.model.merge_and_unload()
+        model = trainer.model
+        if hasattr(model, "merge_and_unload"):
+            model = model.merge_and_unload()
+
         tokenizer = trainer.tokenizer
 
         pipe = pipeline(

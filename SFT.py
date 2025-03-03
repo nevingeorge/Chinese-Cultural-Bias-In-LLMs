@@ -29,7 +29,6 @@ model = LlamaForCausalLM.from_pretrained(
     device_map="auto",
     max_memory=max_memory
 )
-model.quantization_config = quant_config
 model.config.use_cache = False
 
 tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
