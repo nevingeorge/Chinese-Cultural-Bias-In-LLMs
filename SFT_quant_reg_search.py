@@ -17,14 +17,13 @@ import SAR
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
 dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
 
-# LoRA, quantization, SAR
-# options = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [1,0,1], [0,1,1], [1,1,1]]
-options = [[0,0,0]]
+# quantization, SAR
+options = [[0,0], [1,0], [0,1], [1,1]]
 
-with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
+with open("results_SFT_quant_reg_search.txt", "w") as file:
     for option in options:
-        print("Option (LoRA, quantization, SAR):", option)
-        file.write(f"Setting (LoRA, quantization, SAR): {option}\n")
+        print("Option (quantization, SAR):", option)
+        file.write(f"Setting (quantization, SAR): {option}\n")
 
         max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
 
@@ -38,7 +37,6 @@ with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
                 bnb_4bit_use_double_quant=False,
             )
 
-            max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
             model = LlamaForCausalLM.from_pretrained(
                 base_model,
                 quantization_config=quant_config,
@@ -87,51 +85,30 @@ with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
         )
 
         if option[2]: # Use SAR
-            if option[0]: # Use LoRA
-                trainer = SAR.SARTrainer(
-                    model=model,
-                    train_dataset=dataset,
-                    peft_config=peft_params,
-                    tokenizer=tokenizer,
-                    args=training_params,
-                    epsilon=1e-3,   # Adjust perturbation magnitude
-                    alpha=0.1       # Adjust SAR loss weight
-                )
-            else:
-                trainer = SAR.SARTrainer(
-                    model=model,
-                    train_dataset=dataset,
-                    tokenizer=tokenizer,
-                    args=training_params,
-                    epsilon=1e-3,   # Adjust perturbation magnitude
-                    alpha=0.1       # Adjust SAR loss weight
-                )
+            trainer = SAR.SARTrainer(
+                model=model,
+                train_dataset=dataset,
+                peft_config=peft_params,
+                tokenizer=tokenizer,
+                args=training_params,
+                epsilon=1e-3,   # Adjust perturbation magnitude
+                alpha=0.1       # Adjust SAR loss weight
+            )
         else:
-            if option[0]: # Use LoRA
-                trainer = SFTTrainer(
-                    model=model,
-                    train_dataset=dataset,
-                    peft_config=peft_params,
-                    tokenizer=tokenizer,
-                    args=training_params
-                )
-            else:
-                trainer = SFTTrainer(
-                    model=model,
-                    train_dataset=dataset,
-                    tokenizer=tokenizer,
-                    args=training_params
-                )
+            trainer = SFTTrainer(
+                model=model,
+                train_dataset=dataset,
+                peft_config=peft_params,
+                tokenizer=tokenizer,
+                args=training_params
+            )
 
         print("Fine-tuning model...")
         trainer.train()
 
         print("Finished fine-tuning. Beginning evaluation...")
 
-        model = trainer.model
-        if hasattr(model, "merge_and_unload"):
-            model = model.merge_and_unload()
-
+        model = trainer.model.merge_and_unload()
         tokenizer = trainer.tokenizer
 
         pipe = pipeline(
@@ -150,4 +127,4 @@ with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
         file.write(f"Total valid responses: {total}\n")
         file.write("\n")
 
-print("Finished hyperparameter search. Results are saved in results_SFT_LoRA_quant_reg_search.txt.")
+print("Finished hyperparameter search. Results are saved in results_SFT_quant_reg_search.txt.")
