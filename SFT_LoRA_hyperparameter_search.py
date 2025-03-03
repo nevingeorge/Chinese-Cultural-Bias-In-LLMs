@@ -15,12 +15,14 @@ import evaluate_WVS_score
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
 dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
 
-# the first config is the one used in CultureLLM
+# The first config is the one used in CultureLLM
 lora_configurations = [{"lora_alpha": 16, "lora_dropout": 0.1, "r": 64}, 
                        {"lora_alpha": 16, "lora_dropout": 0.1, "r": 8}, 
                        {"lora_alpha": 32, "lora_dropout": 0.1, "r": 16}, 
                        {"lora_alpha": 64, "lora_dropout": 0.05, "r": 32}, 
                        {"lora_alpha": 128, "lora_dropout": 0.0, "r": 64}]
+
+results = []
 
 for lora_config in lora_configurations:
     print("Fine-tuning model with LoRA hyperparameters:", lora_config)
@@ -92,5 +94,14 @@ for lora_config in lora_configurations:
 
     final_score, total = evaluate_WVS_score.obtain_results("./data/WVQ_China_Evaluate.jsonl", pipe)
 
-    print(f"Final score: {final_score:.2f}%")
-    print(f"Total valid responses: {total}")
+    results.append((lora_config, final_score, total))
+
+with open("results_SFT_LoRA_hyperparameter_search.txt", "w") as file:
+    for result in results:
+        lora_config, final_score, total = result
+        file.write(f"LoRA hyperparameters: {lora_config}\n")
+        file.write(f"WVS score: {final_score:.2f}%\n")
+        file.write(f"Total valid responses: {total}\n")
+        file.write("\n")
+
+print("Finished LoRA hyperparameter search. Results are saved in results_SFT_LoRA_hyperparameter_search.txt.")
