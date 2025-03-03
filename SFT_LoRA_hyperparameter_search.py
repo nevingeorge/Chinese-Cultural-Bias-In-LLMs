@@ -53,8 +53,6 @@ for lora_config in lora_configurations:
         per_device_train_batch_size=4,
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
-        save_steps=25,
-        logging_steps=25,
         learning_rate=2e-4,
         weight_decay=0.001,
         fp16=False,
@@ -64,7 +62,9 @@ for lora_config in lora_configurations:
         warmup_ratio=0.03,
         group_by_length=True,
         lr_scheduler_type="constant",
-        report_to="tensorboard",
+        report_to="none",
+        save_strategy="no",
+        logging_dir=None,
         label_names=[str(i) for i in range(0, 11)]
     )
 
