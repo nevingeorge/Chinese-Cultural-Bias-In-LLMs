@@ -12,80 +12,18 @@ from transformers import (
 from peft import LoraConfig
 from trl import SFTTrainer
 import evaluate_WVS_score
-
-class SARTrainer(SFTTrainer):
-    def __init__(self, *args, epsilon=1e-3, alpha=0.1, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.epsilon = epsilon
-        self.alpha = alpha
-    
-    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
-        input_ids = inputs["input_ids"]
-        attention_mask = inputs["attention_mask"]
-        labels = inputs["labels"]
-        
-        outputs = model(**inputs)
-        task_loss = outputs.loss
-        clean_logits = outputs.logits
-        
-        if self.alpha > 0:
-            embedding_layer = model.get_input_embeddings()
-            
-            with torch.no_grad():
-                orig_embeds = embedding_layer(input_ids)
-            
-            inputs_embeds = orig_embeds.clone().detach().requires_grad_(True)
-            
-            perturbed_inputs = {
-                "inputs_embeds": inputs_embeds,
-                "attention_mask": attention_mask,
-                "labels": labels
-            }
-            
-            adv_outputs = model(**perturbed_inputs)
-            adv_loss = adv_outputs.loss
-            
-            gradients = torch.autograd.grad(
-                outputs=adv_loss,
-                inputs=inputs_embeds,
-                create_graph=False,
-                retain_graph=False,
-                only_inputs=True
-            )[0]
-            
-            perturbation = self.epsilon * gradients.sign()
-            
-            perturbed_embeds = inputs_embeds + perturbation
-            
-            perturbed_outputs = model(
-                inputs_embeds=perturbed_embeds,
-                attention_mask=attention_mask,
-                input_ids=None
-            )
-            perturbed_logits = perturbed_outputs.logits
-            
-            sar_loss = F.kl_div(
-                F.log_softmax(clean_logits.detach(), dim=-1), 
-                F.softmax(perturbed_logits, dim=-1), 
-                reduction="batchmean"
-            )
-            
-            total_loss = task_loss + self.alpha * sar_loss
-        else:
-            total_loss = task_loss
-        
-        return (total_loss, outputs) if return_outputs else total_loss
+import SAR
 
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
 dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
 
-# LoRA, quantization, SAR
-options = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [1,0,1], [0,1,1], [1,1,1]]
+# quantization, SAR
+options = [[0,0], [1,0], [0,1], [1,1]]
 
 with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
     for option in options:
-        print("Option (LoRA, quantization, SAR):", option)
-        file.write(f"Setting (LoRA, quantization, SAR): {option}\n")
+        print("Option (quantization, SAR):", option)
+        file.write(f"Setting (quantization, SAR): {option}\n")
 
         max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
         model = LlamaForCausalLM.from_pretrained(
@@ -95,7 +33,7 @@ with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
         )
         model.config.use_cache = False
 
-        if option[1]: # use quantization
+        if option[0]: # use quantization
             compute_dtype = getattr(torch, "float16")
 
             quant_config = BitsAndBytesConfig(
@@ -132,8 +70,8 @@ with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
             label_names=[str(i) for i in range(0, 11)]
         )
 
-        if option[2]: # Use SAR
-            trainer = SARTrainer(
+        if option[1]: # Use SAR
+            trainer = SAR.SARTrainer(
                 model=model,
                 train_dataset=dataset,
                 tokenizer=tokenizer,
@@ -149,26 +87,21 @@ with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
                 args=training_params
             )
 
-        if option[0]: # Use LoRA
-            peft_params = LoraConfig(
-                lora_alpha=32,
-                lora_dropout=0.1,
-                r=16,
-                bias="none",
-                task_type="CAUSAL_LM",
-            )
-
-            trainer.peft_config = peft_params
+        peft_params = LoraConfig(
+            lora_alpha=32,
+            lora_dropout=0.1,
+            r=16,
+            bias="none",
+            task_type="CAUSAL_LM",
+        )
+        trainer.peft_config = peft_params
 
         print("Fine-tuning model...")
         trainer.train()
 
         print("Finished fine-tuning. Beginning evaluation...")
 
-        model = trainer.model
-        if hasattr(model, "merge_and_unload"):
-            model = model.merge_and_unload()
-
+        model = trainer.model.merge_and_unload()
         tokenizer = trainer.tokenizer
 
         pipe = pipeline(
