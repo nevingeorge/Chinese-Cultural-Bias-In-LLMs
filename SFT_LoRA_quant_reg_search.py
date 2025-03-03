@@ -82,8 +82,7 @@ dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split=
 results = []
 
 # LoRA, quantization, SAR
-options = [[0,0,1]]
-# options = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [1,0,1], [0,1,1], [1,1,1]]
+options = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [1,0,1], [0,1,1], [1,1,1]]
 
 for option in options:
     print("Option (LoRA, quantization, SAR):", option)
