@@ -16,11 +16,13 @@ base_model = 'meta-llama/Llama-3.2-1B-Instruct'
 dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
 
 # The first config is the one used in CultureLLM
+# lora_configurations = [{"lora_alpha": 16, "lora_dropout": 0.1, "r": 64}, 
+#                        {"lora_alpha": 16, "lora_dropout": 0.1, "r": 8}, 
+#                        {"lora_alpha": 32, "lora_dropout": 0.1, "r": 16}, 
+#                        {"lora_alpha": 64, "lora_dropout": 0.05, "r": 32}, 
+#                        {"lora_alpha": 128, "lora_dropout": 0.0, "r": 64}]
 lora_configurations = [{"lora_alpha": 16, "lora_dropout": 0.1, "r": 64}, 
-                       {"lora_alpha": 16, "lora_dropout": 0.1, "r": 8}, 
-                       {"lora_alpha": 32, "lora_dropout": 0.1, "r": 16}, 
-                       {"lora_alpha": 64, "lora_dropout": 0.05, "r": 32}, 
-                       {"lora_alpha": 128, "lora_dropout": 0.0, "r": 64}]
+                       {"lora_alpha": 16, "lora_dropout": 0.1, "r": 8}]
 
 results = []
 
