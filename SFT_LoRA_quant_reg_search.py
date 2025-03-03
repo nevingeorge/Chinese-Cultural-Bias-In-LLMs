@@ -27,7 +27,7 @@ class SARTrainer(SFTTrainer):
         task_loss = F.cross_entropy(logits.view(-1, logits.size(-1)), labels.view(-1), ignore_index=-100)
 
         # Generate adversarial perturbation
-        inputs_embeds = model.get_input_embeddings()(inputs["input_ids"])
+        inputs_embeds = model.get_input_embeddings()(inputs["input_ids"]).detach().clone()
         inputs_embeds.requires_grad = True
 
         perturbed_outputs = model(inputs_embeds=inputs_embeds, attention_mask=inputs["attention_mask"])
