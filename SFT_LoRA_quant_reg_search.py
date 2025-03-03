@@ -19,7 +19,7 @@ class SARTrainer(SFTTrainer):
         self.epsilon = epsilon  # Perturbation magnitude
         self.alpha = alpha      # SAR loss weight
 
-    def compute_loss(self, model, inputs, return_outputs=False):
+    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
         # Forward pass for standard loss
         labels = inputs["labels"]
         outputs = model(**inputs)
