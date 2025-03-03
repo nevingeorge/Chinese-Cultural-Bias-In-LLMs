@@ -16,39 +16,64 @@ import evaluate_WVS_score
 class SARTrainer(SFTTrainer):
     def __init__(self, *args, epsilon=1e-3, alpha=0.1, **kwargs):
         super().__init__(*args, **kwargs)
-        self.epsilon = epsilon  # Perturbation magnitude
-        self.alpha = alpha      # SAR loss weight
-
+        self.epsilon = epsilon
+        self.alpha = alpha
+    
     def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
-        # Forward pass for standard loss
+        input_ids = inputs["input_ids"]
+        attention_mask = inputs["attention_mask"]
         labels = inputs["labels"]
+        
         outputs = model(**inputs)
-        logits = outputs.logits
-        task_loss = F.cross_entropy(logits.view(-1, logits.size(-1)), labels.view(-1), ignore_index=-100)
-
-        # Generate adversarial perturbation
-        inputs_embeds = model.get_input_embeddings()(inputs["input_ids"]).detach().clone()
-        inputs_embeds.requires_grad = True
-
-        perturbed_outputs = model(inputs_embeds=inputs_embeds, attention_mask=inputs["attention_mask"])
-        perturbed_logits = perturbed_outputs.logits
-
-        loss_adv = F.cross_entropy(perturbed_logits.view(-1, logits.size(-1)), labels.view(-1), ignore_index=-100)
-        loss_adv.backward()
-
-        perturbation = self.epsilon * inputs_embeds.grad.sign()
-        perturbed_inputs = inputs_embeds + perturbation.detach()
-
-        # Forward pass on perturbed inputs
-        perturbed_outputs = model(inputs_embeds=perturbed_inputs, attention_mask=inputs["attention_mask"])
-        perturbed_logits = perturbed_outputs.logits
-
-        # Compute KL divergence loss
-        sar_loss = F.kl_div(F.log_softmax(logits, dim=-1), F.softmax(perturbed_logits, dim=-1), reduction="batchmean")
-
-        # Combine losses
-        total_loss = task_loss + self.alpha * sar_loss
-
+        task_loss = outputs.loss
+        clean_logits = outputs.logits
+        
+        if self.alpha > 0:
+            embedding_layer = model.get_input_embeddings()
+            
+            with torch.no_grad():
+                orig_embeds = embedding_layer(input_ids)
+            
+            inputs_embeds = orig_embeds.clone().detach().requires_grad_(True)
+            
+            perturbed_inputs = {
+                "inputs_embeds": inputs_embeds,
+                "attention_mask": attention_mask,
+                "labels": labels
+            }
+            
+            adv_outputs = model(**perturbed_inputs)
+            adv_loss = adv_outputs.loss
+            
+            gradients = torch.autograd.grad(
+                outputs=adv_loss,
+                inputs=inputs_embeds,
+                create_graph=False,
+                retain_graph=False,
+                only_inputs=True
+            )[0]
+            
+            perturbation = self.epsilon * gradients.sign()
+            
+            perturbed_embeds = inputs_embeds + perturbation
+            
+            perturbed_outputs = model(
+                inputs_embeds=perturbed_embeds,
+                attention_mask=attention_mask,
+                input_ids=None
+            )
+            perturbed_logits = perturbed_outputs.logits
+            
+            sar_loss = F.kl_div(
+                F.log_softmax(clean_logits.detach(), dim=-1), 
+                F.softmax(perturbed_logits, dim=-1), 
+                reduction="batchmean"
+            )
+            
+            total_loss = task_loss + self.alpha * sar_loss
+        else:
+            total_loss = task_loss
+        
         return (total_loss, outputs) if return_outputs else total_loss
 
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
@@ -57,8 +82,8 @@ dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split=
 results = []
 
 # LoRA, quantization, SAR
-# options = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [1,0,1], [0,1,1], [1,1,1]]
 options = [[0,0,1]]
+# options = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [1,0,1], [0,1,1], [1,1,1]]
 
 for option in options:
     print("Option (LoRA, quantization, SAR):", option)
