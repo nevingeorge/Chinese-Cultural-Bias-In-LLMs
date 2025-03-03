@@ -70,7 +70,7 @@ for option in options:
     )
     model.config.use_cache = False
 
-    if options[1]: # use quantization
+    if option[1]: # use quantization
         compute_dtype = getattr(torch, "float16")
 
         quant_config = BitsAndBytesConfig(
@@ -107,7 +107,7 @@ for option in options:
         label_names=[str(i) for i in range(0, 11)]
     )
 
-    if options[2]: # Use SAR
+    if option[2]: # Use SAR
         trainer = SARTrainer(
             model=model,
             train_dataset=dataset,
@@ -125,7 +125,7 @@ for option in options:
             args=training_params
         )
 
-    if options[0]: # Use LoRA
+    if option[0]: # Use LoRA
         peft_params = LoraConfig(
             lora_alpha=32,
             lora_dropout=0.1,
