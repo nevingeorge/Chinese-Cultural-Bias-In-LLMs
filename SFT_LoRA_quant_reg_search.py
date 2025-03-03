@@ -126,9 +126,9 @@ for option in options:
 
     if options[0]: # Use LoRA
         peft_params = LoraConfig(
-            lora_alpha=16,
+            lora_alpha=32,
             lora_dropout=0.1,
-            r=64,
+            r=16,
             bias="none",
             task_type="CAUSAL_LM",
         )
