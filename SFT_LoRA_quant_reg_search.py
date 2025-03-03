@@ -21,7 +21,7 @@ class SARTrainer(SFTTrainer):
 
     def compute_loss(self, model, inputs, return_outputs=False):
         # Forward pass for standard loss
-        labels = inputs.pop("labels")
+        labels = inputs["labels"]
         outputs = model(**inputs)
         logits = outputs.logits
         task_loss = F.cross_entropy(logits.view(-1, logits.size(-1)), labels.view(-1), ignore_index=-100)
@@ -116,6 +116,7 @@ for option in options:
             epsilon=1e-3,   # Adjust perturbation magnitude
             alpha=0.1       # Adjust SAR loss weight
         )
+        print("In SAR case")
     else:
         trainer = SFTTrainer(
             model=model,
