@@ -19,7 +19,7 @@ dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split=
 
 # LoRA, quantization, SAR
 # options = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [1,0,1], [0,1,1], [1,1,1]]
-options = [[1,0,0]]
+options = [[0,0,0]]
 
 with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
     for option in options:
