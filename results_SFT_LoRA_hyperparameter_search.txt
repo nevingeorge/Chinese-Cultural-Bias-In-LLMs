@@ -1,0 +1,20 @@
+LoRA hyperparameters: {'lora_alpha': 16, 'lora_dropout': 0.1, 'r': 64}
+WVS score: -40.79%
+Total valid responses: 1050
+
+LoRA hyperparameters: {'lora_alpha': 16, 'lora_dropout': 0.1, 'r': 8}
+WVS score: 73.82%
+Total valid responses: 1050
+
+LoRA hyperparameters: {'lora_alpha': 32, 'lora_dropout': 0.1, 'r': 16}
+WVS score: 85.04%
+Total valid responses: 1050
+
+LoRA hyperparameters: {'lora_alpha': 64, 'lora_dropout': 0.05, 'r': 32}
+WVS score: 84.98%
+Total valid responses: 1050
+
+LoRA hyperparameters: {'lora_alpha': 128, 'lora_dropout': 0.0, 'r': 64}
+WVS score: 85.36%
+Total valid responses: 1048
+
