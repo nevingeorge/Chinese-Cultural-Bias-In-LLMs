@@ -33,17 +33,16 @@ with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
         )
         model.config.use_cache = False
 
-        if option[0]: # use quantization
-            compute_dtype = getattr(torch, "float16")
+        compute_dtype = getattr(torch, "float16")
 
-            quant_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_compute_dtype=compute_dtype,
-                bnb_4bit_use_double_quant=False,
-            )
+        quant_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=compute_dtype,
+            bnb_4bit_use_double_quant=False,
+        )
 
-            model.quantization_config = quant_config
+        model.quantization_config = quant_config
 
         tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
         tokenizer.pad_token = tokenizer.eos_token
@@ -70,12 +69,22 @@ with open("results_SFT_LoRA_quant_reg_search.txt", "w") as file:
             label_names=[str(i) for i in range(0, 11)]
         )
 
-        trainer = SFTTrainer(
-            model=model,
-            train_dataset=dataset,
-            tokenizer=tokenizer,
-            args=training_params
-        )
+        if option[1]: # Use SAR
+            trainer = SAR.SARTrainer(
+                model=model,
+                train_dataset=dataset,
+                tokenizer=tokenizer,
+                args=training_params,
+                epsilon=1e-3,   # Adjust perturbation magnitude
+                alpha=0.1       # Adjust SAR loss weight
+            )
+        else:
+            trainer = SFTTrainer(
+                model=model,
+                train_dataset=dataset,
+                tokenizer=tokenizer,
+                args=training_params
+            )
 
         peft_params = LoraConfig(
             lora_alpha=32,
