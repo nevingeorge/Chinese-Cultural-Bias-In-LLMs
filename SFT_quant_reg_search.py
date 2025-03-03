@@ -27,7 +27,7 @@ with open("results_SFT_quant_reg_search.txt", "w") as file:
 
         max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
 
-        if option[1]: # use quantization
+        if option[0]: # use quantization
             compute_dtype = getattr(torch, "float16")
 
             quant_config = BitsAndBytesConfig(
@@ -84,7 +84,7 @@ with open("results_SFT_quant_reg_search.txt", "w") as file:
             task_type="CAUSAL_LM",
         )
 
-        if option[2]: # Use SAR
+        if option[1]: # Use SAR
             trainer = SAR.SARTrainer(
                 model=model,
                 train_dataset=dataset,
