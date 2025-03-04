@@ -39,8 +39,8 @@ def replace_text_in_jsonl(input_file, output_file, old_text, new_text):
 
 def main():
     parser = argparse.ArgumentParser(description='Replace text in a JSONL file')
-    parser.add_argument('--input_file', type=str, default="../data/WVQ_China_1000.jsonl", help='Path to the input JSONL file')
-    parser.add_argument('--output_file', type=str, default="../data/WVQ_China_1000_modified.jsonl", help='Path to the output JSONL file')
+    parser.add_argument('--input_file', type=str, default="./WVQ_China_1000.jsonl", help='Path to the input JSONL file')
+    parser.add_argument('--output_file', type=str, default="./WVQ_China_1000_modified.jsonl", help='Path to the output JSONL file')
     parser.add_argument('--old-text', type=str, 
                         default="You can only choose one option.",
                         help='Text to be replaced (default: "You can only choose one option.")')
