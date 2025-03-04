@@ -1,0 +1,16 @@
+Setting (quantization, SAR): [0, 0]
+WVS score: 84.34%
+Total valid responses: 1050
+
+Setting (quantization, SAR): [1, 0]
+WVS score: 78.13%
+Total valid responses: 1050
+
+Setting (quantization, SAR): [0, 1]
+WVS score: 77.60%
+Total valid responses: 1050
+
+Setting (quantization, SAR): [1, 1]
+WVS score: 80.08%
+Total valid responses: 1050
+
