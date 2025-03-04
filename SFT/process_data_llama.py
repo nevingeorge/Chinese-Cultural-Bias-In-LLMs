@@ -19,8 +19,8 @@ def format_prompts(input_file, output_file):
 
 def main():
     parser = argparse.ArgumentParser(description='Format prompts in Llama style')
-    parser.add_argument('--input_file', type=str, default='./data/WVQ_China_Train.jsonl', help='Path to the input JSONL file')
-    parser.add_argument('--output_file', type=str, default="./data/WVQ_China_Train_Llama.jsonl", help='Path to the output JSONL file')
+    parser.add_argument('--input_file', type=str, default='../data/WVQ_China_Train.jsonl', help='Path to the input JSONL file')
+    parser.add_argument('--output_file', type=str, default="../data/WVQ_China_Train_Llama.jsonl", help='Path to the output JSONL file')
     
     args = parser.parse_args()
     

@@ -11,7 +11,7 @@ from peft import LoraConfig
 from trl import SFTTrainer
 
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
-dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
+dataset = load_dataset("json", data_files="../data/WVQ_China_Train.jsonl", split="train")
 
 max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
 model = LlamaForCausalLM.from_pretrained(
@@ -65,7 +65,7 @@ trainer = SFTTrainer(
 print("Fine-tuning model...")
 trainer.train()
 
-output_dir = "SFT-LoRA-Llama-3.2-1B-Instruct"
+output_dir = "../models/SFT-LoRA-Llama-3.2-1B-Instruct"
 trainer.model.save_pretrained(output_dir)
 trainer.tokenizer.save_pretrained(output_dir)
 

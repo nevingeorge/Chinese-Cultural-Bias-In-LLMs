@@ -15,7 +15,7 @@ import evaluate_WVS_score
 import SAR
 
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
-dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
+dataset = load_dataset("json", data_files="../data/WVQ_China_Train.jsonl", split="train")
 
 # quantization, SAR
 options = [[0,0], [1,0], [0,1], [1,1]]
@@ -119,7 +119,7 @@ with open("results_SFT_quant_reg_search.txt", "w") as file:
             device_map="auto",
         )
 
-        final_score, total = evaluate_WVS_score.obtain_results("./data/WVQ_China_Evaluate.jsonl", pipe)
+        final_score, total = evaluate_WVS_score.obtain_results("../data/WVQ_China_Evaluate.jsonl", pipe)
 
         print(f"WVS score: {final_score:.2f}%")
         print(f"Total valid responses: {total}")

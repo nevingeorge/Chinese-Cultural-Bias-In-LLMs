@@ -13,7 +13,7 @@ from trl import SFTTrainer
 import evaluate_WVS_score
 
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
-dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
+dataset = load_dataset("json", data_files="../data/WVQ_China_Train.jsonl", split="train")
 
 # The first config is the one used in CultureLLM
 lora_configurations = [{"lora_alpha": 16, "lora_dropout": 0.1, "r": 64}, 
@@ -92,7 +92,7 @@ for lora_config in lora_configurations:
         device_map="auto",
     )
 
-    final_score, total = evaluate_WVS_score.obtain_results("./data/WVQ_China_Evaluate.jsonl", pipe)
+    final_score, total = evaluate_WVS_score.obtain_results("../data/WVQ_China_Evaluate.jsonl", pipe)
 
     results.append((lora_config, final_score, total))
 

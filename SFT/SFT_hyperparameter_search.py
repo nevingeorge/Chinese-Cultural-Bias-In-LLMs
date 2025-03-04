@@ -14,7 +14,7 @@ from itertools import product
 import evaluate_WVS_score
 
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
-dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
+dataset = load_dataset("json", data_files="../data/WVQ_China_Train.jsonl", split="train")
 
 # num_epochs = 6 and learning_rate = 2e-4 is what CultureLLMM uses
 num_epochs_options = [1, 3, 6, 10]
@@ -92,7 +92,7 @@ with open("results_SFT_hyperparameter_search.txt", "w") as file:
             device_map="auto",
         )
 
-        final_score, total = evaluate_WVS_score.obtain_results("./data/WVQ_China_Evaluate.jsonl", pipe)
+        final_score, total = evaluate_WVS_score.obtain_results("../data/WVQ_China_Evaluate.jsonl", pipe)
 
         print(f"WVS score: {final_score:.2f}%")
         print(f"Total valid responses: {total}")

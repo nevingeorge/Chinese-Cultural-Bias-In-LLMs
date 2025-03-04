@@ -30,7 +30,7 @@ def split_jsonl(input_file, output_prefix):
 
 def main():
     parser = argparse.ArgumentParser(description='Split a JSONL file into two equal parts')
-    parser.add_argument('--input_file', type=str, default='./data/WVQ_China_1000_modified.jsonl', help='Path to the input JSONL file')
+    parser.add_argument('--input_file', type=str, default='../data/WVQ_China_1000_modified.jsonl', help='Path to the input JSONL file')
     parser.add_argument('--output-prefix', type=str, default='split', 
                         help='Prefix for output files (default: "split")')
     
