@@ -1,0 +1,64 @@
+num_epochs=1 and learning_rate=1e-05.
+WVS score: 68.41%
+Total valid responses: 1049
+
+num_epochs=1 and learning_rate=5e-05.
+WVS score: 70.91%
+Total valid responses: 1050
+
+num_epochs=1 and learning_rate=0.0002.
+WVS score: 76.96%
+Total valid responses: 1050
+
+num_epochs=1 and learning_rate=0.001.
+WVS score: 74.19%
+Total valid responses: 1050
+
+num_epochs=3 and learning_rate=1e-05.
+WVS score: 70.52%
+Total valid responses: 1050
+
+num_epochs=3 and learning_rate=5e-05.
+WVS score: 78.94%
+Total valid responses: 1050
+
+num_epochs=3 and learning_rate=0.0002.
+WVS score: 82.73%
+Total valid responses: 1050
+
+num_epochs=3 and learning_rate=0.001.
+WVS score: 80.63%
+Total valid responses: 1050
+
+num_epochs=6 and learning_rate=1e-05.
+WVS score: 70.79%
+Total valid responses: 1050
+
+num_epochs=6 and learning_rate=5e-05.
+WVS score: 79.45%
+Total valid responses: 1048
+
+num_epochs=6 and learning_rate=0.0002.
+WVS score: 84.80%
+Total valid responses: 1050
+
+num_epochs=6 and learning_rate=0.001.
+WVS score: 83.27%
+Total valid responses: 1050
+
+num_epochs=10 and learning_rate=1e-05.
+WVS score: 75.07%
+Total valid responses: 1050
+
+num_epochs=10 and learning_rate=5e-05.
+WVS score: 75.24%
+Total valid responses: 1050
+
+num_epochs=10 and learning_rate=0.0002.
+WVS score: 84.90%
+Total valid responses: 1050
+
+num_epochs=10 and learning_rate=0.001.
+WVS score: 84.54%
+Total valid responses: 1050
+
