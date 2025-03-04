@@ -25,6 +25,7 @@ grid_search_params = list(product(num_epochs_options, learning_rate_options))
 with open("results_SFT_hyperparameter_search.txt", "w") as file:
     for num_epochs, learning_rate in grid_search_params:
         print(f"Fine-tuning model with num_epochs={num_epochs} and learning_rate={learning_rate}.")
+        file.write(f"num_epochs={num_epochs} and learning_rate={learning_rate}.")
 
         max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
         model = LlamaForCausalLM.from_pretrained(
