@@ -13,19 +13,9 @@ from trl import SFTTrainer
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
 dataset = load_dataset("json", data_files="./data/WVQ_China_Train.jsonl", split="train")
 
-compute_dtype = getattr(torch, "float16")
-
-quant_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=compute_dtype,
-    bnb_4bit_use_double_quant=False,
-)
-
 max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
 model = LlamaForCausalLM.from_pretrained(
     base_model,
-    quantization_config=quant_config,
     device_map="auto",
     max_memory=max_memory
 )
@@ -35,13 +25,6 @@ tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"
 
-peft_params = LoraConfig(
-    lora_alpha=16,
-    lora_dropout=0.1,
-    r=64,
-    bias="none",
-    task_type="CAUSAL_LM",
-)
 training_params = TrainingArguments(
     output_dir="./SFT-fine-tune-results",
     num_train_epochs=6,
@@ -61,6 +44,14 @@ training_params = TrainingArguments(
     lr_scheduler_type="constant",
     report_to="tensorboard",
     label_names=[str(i) for i in range(0, 11)]
+)
+
+peft_params = LoraConfig(
+    lora_alpha=32,
+    lora_dropout=0.1,
+    r=16,
+    bias="none",
+    task_type="CAUSAL_LM",
 )
 
 trainer = SFTTrainer(
