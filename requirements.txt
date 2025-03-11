@@ -17,3 +17,5 @@ peft
 huggingface_hub[cli]
 openpyxl
 trl
+sentence_transformers
+pandas
