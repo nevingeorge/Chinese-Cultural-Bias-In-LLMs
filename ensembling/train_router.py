@@ -61,7 +61,7 @@ train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(router.parameters(), lr=0.001)
 
-def train_router(epochs=5):
+def train_time_router(epochs=5):
     router.train()
     for epoch in range(epochs):
         total_loss = 0.0
@@ -74,7 +74,7 @@ def train_router(epochs=5):
             total_loss += loss.item()
         print(f"Epoch {epoch+1}, Loss: {total_loss / len(train_loader)}")
 
-train_router()
+train_time_router()
 
 torch.save(router.state_dict(), ROUTER_MODEL_PATH)
 print(f"Router model saved to {ROUTER_MODEL_PATH}")
