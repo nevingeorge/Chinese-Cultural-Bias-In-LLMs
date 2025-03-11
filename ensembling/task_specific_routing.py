@@ -7,7 +7,7 @@ import train_router
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-FINAL_MODEL_PATH = "../models/task_routing_model"
+FINAL_MODEL_PATH = "../models/task_routing_model.pth"
 text_encoder = SentenceTransformer("all-MiniLM-L6-v2")
 
 class TaskModel(nn.Module):
