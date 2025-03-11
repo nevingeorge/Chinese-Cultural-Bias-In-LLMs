@@ -6,6 +6,9 @@ from sentence_transformers import SentenceTransformer
 import json
 import pandas as pd
 
+ROUTER_MODEL_PATH = "./task_router.pth"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class TaskRouter(nn.Module):
     def __init__(self, input_dim):
         super(TaskRouter, self).__init__()
@@ -54,9 +57,6 @@ def train_time_router(router, optimizer, criterion, train_loader, epochs=5):
         print(f"Epoch {epoch+1}, Loss: {total_loss / len(train_loader)}")
 
 def main():
-    ROUTER_MODEL_PATH = "./task_router.pth"
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     router = TaskRouter(input_dim=384).to(device)  # MiniLM produces 384-dim embeddings
 
     task1_texts, task1_labels = load_json_WVS_dataset("../data/WVQ_China_Train.jsonl", label=0)
