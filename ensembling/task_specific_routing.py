@@ -5,6 +5,8 @@ from torch.utils.data import Dataset, DataLoader
 from sentence_transformers import SentenceTransformer
 import json
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 # Create a directory to save the new model
 SAVE_DIR = "saved_models"
 os.makedirs(SAVE_DIR, exist_ok=True)
@@ -24,8 +26,8 @@ class TaskModel(nn.Module):
         return self.model(x)
 
 # Load pre-trained models for each task
-task1_model = TaskModel("path/to/task1_model.pth")
-task2_model = TaskModel("path/to/task2_model.pth")
+task1_model = TaskModel("path/to/task1_model.pth").to(device)
+task2_model = TaskModel("path/to/task2_model.pth").to(device)
 
 # Define Task Router (Binary Classifier)
 class TaskRouter(nn.Module):
@@ -51,7 +53,7 @@ class TaskRoutingModel(nn.Module):
 
     def forward(self, text_input):
         # Convert text to embedding
-        text_embedding = text_encoder.encode(text_input, convert_to_tensor=True).unsqueeze(0)
+        text_embedding = text_encoder.encode(text_input, convert_to_tensor=True).unsqueeze(0).to(device)
 
         # Use router to determine the task
         with torch.no_grad():
@@ -67,7 +69,7 @@ class TaskRoutingModel(nn.Module):
         return output
 
 # Instantiate the final routing model
-task_routing_model = TaskRoutingModel(router, task1_model, task2_model)
+task_routing_model = TaskRoutingModel(router, task1_model, task2_model).to(device)
 
 # Save the new model
 torch.save(task_routing_model.state_dict(), FINAL_MODEL_PATH)

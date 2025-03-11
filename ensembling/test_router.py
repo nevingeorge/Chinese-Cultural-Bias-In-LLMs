@@ -3,6 +3,7 @@ import train_router
 from sentence_transformers import SentenceTransformer
 
 ROUTER_MODEL_PATH = "./task_router.pth"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 text_encoder = SentenceTransformer("all-MiniLM-L6-v2")
 
 def load_router():
@@ -14,7 +15,7 @@ def load_router():
 router = load_router()
 sample_texts = ["Translate 'hello' to Spanish.", "Analyze sentiment of this tweet."]
 with torch.no_grad():
-    embeddings = text_encoder.encode(sample_texts, convert_to_tensor=True)
+    embeddings = text_encoder.encode(sample_texts, convert_to_tensor=True).to(device)
     routing_logits = router(embeddings)
     predictions = torch.argmax(routing_logits, dim=-1)
 

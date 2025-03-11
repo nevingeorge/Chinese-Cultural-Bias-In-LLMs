@@ -7,6 +7,7 @@ import json
 import pandas as pd
 
 ROUTER_MODEL_PATH = "./task_router.pth"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load a text embedding model
 text_encoder = SentenceTransformer("all-MiniLM-L6-v2")
@@ -19,7 +20,7 @@ class TaskRouter(nn.Module):
     def forward(self, x):
         return self.fc(x)  # No softmax (CrossEntropyLoss will handle it)
 
-router = TaskRouter(input_dim=384)  # MiniLM produces 384-dim embeddings
+router = TaskRouter(input_dim=384).to(device)  # MiniLM produces 384-dim embeddings
 
 def load_json_WVS_dataset(json_path, label):
     texts = []
@@ -50,7 +51,7 @@ class TextDataset(Dataset):
         return len(self.texts)
 
     def __getitem__(self, idx):
-        text_embedding = text_encoder.encode(self.texts[idx], convert_to_tensor=True)
+        text_embedding = text_encoder.encode(self.texts[idx], convert_to_tensor=True).to(device)
         label = torch.tensor(self.labels[idx], dtype=torch.long)
         return text_embedding, label
 
