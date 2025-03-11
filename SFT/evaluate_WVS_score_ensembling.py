@@ -31,7 +31,9 @@ def obtain_results(file_name, model):
             correct_answer = int(data['messages'][2]['content'])
             starting_choice, ending_choice = extract_first_two_numbers(data['messages'][1]['content'])
 
-            outputs = model(data['messages'][0:2])
+            input = data['messages'][0]["content"] + " " + data['messages'][1]["content"]
+            
+            outputs = model(input)
             response = outputs[0]["generated_text"][-1]['content']
             predicted_number = extract_number_from_response(response)
             
