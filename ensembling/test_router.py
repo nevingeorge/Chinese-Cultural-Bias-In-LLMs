@@ -12,7 +12,7 @@ def load_router():
     loaded_router.eval()
     return loaded_router
 
-router = load_router()
+router = load_router().to(device)
 sample_texts = ["Translate 'hello' to Spanish.", "Analyze sentiment of this tweet."]
 with torch.no_grad():
     embeddings = text_encoder.encode(sample_texts, convert_to_tensor=True).to(device)
