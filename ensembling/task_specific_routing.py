@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from transformers import PreTrainedModel, AutoModelForCausalLM, AutoTokenizer, pipeline
 from peft import PeftModel, PeftConfig
 from sentence_transformers import SentenceTransformer
 import train_router
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-FINAL_MODEL_PATH = "../models/task_routing_model.pth"
+FINAL_MODEL_PATH = "../models/task_routing_model"
 text_encoder = SentenceTransformer("all-MiniLM-L6-v2")
 
 class TaskModel(nn.Module):
@@ -46,10 +46,10 @@ task2_model = TaskModel("../models/sft-dpo_epochs_lr_6_0.0002_4e-06").to(device)
 router = train_router.TaskRouter(input_dim=384)
 router.load_state_dict(torch.load("./task_router.pth"))
 router.eval()
-
-class TaskRoutingModel(nn.Module):
-    def __init__(self, router, task1_model, task2_model):
-        super(TaskRoutingModel, self).__init__()
+    
+class TaskRoutingTransformer(PreTrainedModel):
+    def __init__(self, config, router, task1_model, task2_model):
+        super().__init__(config)
         self.router = router
         self.task1_model = task1_model
         self.task2_model = task2_model
@@ -64,15 +64,12 @@ class TaskRoutingModel(nn.Module):
 
         # Route to the correct model
         if task_assignment == 0:
-            output = self.task1_model(text_input)
+            return self.task1_model(text_input)
         else:
-            output = self.task2_model(text_input)
+            return self.task2_model(text_input)
 
-        return output
-
-task_routing_model = TaskRoutingModel(router, task1_model, task2_model).to(device)
-
-torch.save(task_routing_model.state_dict(), FINAL_MODEL_PATH)
+final_model = TaskRoutingTransformer(task1_model.model.config, router, task1_model, task2_model)
+final_model.save_pretrained(FINAL_MODEL_PATH)
 print(f"Final routing model saved to {FINAL_MODEL_PATH}")
 
 # # Function to Load and Use the Final Routing Model
