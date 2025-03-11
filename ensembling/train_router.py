@@ -52,7 +52,7 @@ class TextDataset(Dataset):
 
     def __getitem__(self, idx):
         text_embedding = text_encoder.encode(self.texts[idx], convert_to_tensor=True).to(device)
-        label = torch.tensor(self.labels[idx], dtype=torch.long)
+        label = torch.tensor(self.labels[idx], dtype=torch.long).to(device)
         return text_embedding, label
 
 train_dataset = TextDataset(train_texts, train_labels)
