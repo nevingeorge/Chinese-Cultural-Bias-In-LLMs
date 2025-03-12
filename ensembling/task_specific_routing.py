@@ -48,8 +48,10 @@ def generate_output(pipe1, pipe2, router, text_input):
         task_assignment = torch.argmax(routing_logits, dim=-1).item()
 
     if task_assignment == 0:
+        print("Task 0")
         return pipe1(text_input, max_new_tokens=10, pad_token_id=128001)
     else:
+        print("Task 1")
         return pipe2(text_input)
 
 def main():
