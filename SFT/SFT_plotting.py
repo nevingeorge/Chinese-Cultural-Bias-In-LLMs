@@ -83,7 +83,7 @@ plt.ylabel("Loss")
 plt.title("WVS Score SFT Loss vs. Epochs")
 plt.grid(True)
 
-plt.savefig("WVVS_score_SFT_loss_vs_epochs.png", dpi=300)  # Saves as a high-resolution PNG file
-plt.savefig("WVVS_score_SFT_loss_vs_epochs.pdf")  # Saves as a PDF
+plt.savefig("WVS_score_SFT_loss_vs_epochs.png", dpi=300)  # Saves as a high-resolution PNG file
+plt.savefig("WVS_score_SFT_loss_vs_epochs.pdf")  # Saves as a PDF
 
 plt.show()

@@ -19,3 +19,4 @@ openpyxl
 trl
 sentence_transformers
 pandas
+matplotlib
