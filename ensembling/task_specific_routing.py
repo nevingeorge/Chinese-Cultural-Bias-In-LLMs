@@ -69,11 +69,11 @@ def main():
     task2_model = TaskModel("../models/sft-dpo_epochs_lr_6_0.0002_4e-06").to(device)
 
     # Load trained router model 
-    router = train_router.TaskRouter(input_dim=384)
+    router = train_router.TaskRouter(input_dim=384).to(device)
     router.load_state_dict(torch.load("./task_router.pth"))
     router.eval()
 
-    final_model = TaskRoutingTransformer(task1_model.model.config, router, task1_model, task2_model)
+    final_model = TaskRoutingTransformer(task1_model.model.config, router, task1_model, task2_model).to(device)
 
     print("Generated Output:", test_task_routing_transformer(final_model, "Translate 'hello' to Spanish."))
 
