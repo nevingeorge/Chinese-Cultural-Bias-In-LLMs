@@ -37,15 +37,6 @@ class TaskModel(nn.Module):
             device_map="auto"
         )
         return pipe(x)
-
-# Load pre-trained models for each task
-task1_model = TaskModel("../models/SFT-LoRA-Llama-3.2-1B-Instruct").to(device)
-task2_model = TaskModel("../models/sft-dpo_epochs_lr_6_0.0002_4e-06").to(device)
-
-# Load trained router model 
-router = train_router.TaskRouter(input_dim=384)
-router.load_state_dict(torch.load("./task_router.pth"))
-router.eval()
     
 class TaskRoutingTransformer(PreTrainedModel):
     def __init__(self, config, router, task1_model, task2_model):
@@ -68,22 +59,23 @@ class TaskRoutingTransformer(PreTrainedModel):
         else:
             return self.task2_model(text_input)
 
-final_model = TaskRoutingTransformer(task1_model.model.config, router, task1_model, task2_model)
-final_model.save_pretrained(FINAL_MODEL_PATH)
-print(f"Final routing model saved to {FINAL_MODEL_PATH}")
+def test_task_routing_transformer(model, sample_text):
+    with torch.no_grad():
+        return model(sample_text)
 
-# # Function to Load and Use the Final Routing Model
-# def load_task_routing_model():
-#     loaded_model = TaskRoutingModel(router, task1_model, task2_model)
-#     loaded_model.load_state_dict(torch.load(FINAL_MODEL_PATH))
-#     loaded_model.eval()
-#     return loaded_model
+def main():
+    # Load pre-trained models for each task
+    task1_model = TaskModel("../models/SFT-LoRA-Llama-3.2-1B-Instruct").to(device)
+    task2_model = TaskModel("../models/sft-dpo_epochs_lr_6_0.0002_4e-06").to(device)
 
-# # Load and Test the Final Routing Model
-# task_routing_model = load_task_routing_model()
-# sample_text = "Translate 'hello' to Spanish."
+    # Load trained router model 
+    router = train_router.TaskRouter(input_dim=384)
+    router.load_state_dict(torch.load("./task_router.pth"))
+    router.eval()
 
-# with torch.no_grad():
-#     output = task_routing_model(sample_text)
+    final_model = TaskRoutingTransformer(task1_model.model.config, router, task1_model, task2_model)
 
-# print("Generated Output:", output)
+    print("Generated Output:", test_task_routing_transformer(final_model, "Translate 'hello' to Spanish."))
+
+if __name__ == "__main__":
+    main()
