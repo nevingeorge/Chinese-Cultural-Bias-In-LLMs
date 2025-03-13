@@ -248,23 +248,6 @@ QUERIES_EN = {
 }
 
 
-
-"""
-    SELECT ?entityLabel ?entity WHERE {
-        {
-            VALUES ?entity { wd:Q30 wd:Q16 wd:Q408 wd:Q664 }    # USA, Canada, Australia, New Zealand
-        }
-        UNION 
-        {
-            ?entity wdt:P31 wd:Q6256;       # "instance of": "country"
-                    wdt:P30 wd:Q46.         # "continent": "Europe"
-        }
-        
-        SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-    }
-    LIMIT 500
-"""
-
 author_query = """
 SELECT ?entityLabel ?entity WHERE {
   ?entity wdt:P106 wd:Q36180;  # "occupation of": "writer"
@@ -389,21 +372,10 @@ if __name__ == '__main__':
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
 
-    # results = sparql.query().convert()
     results = sparql.query()
-    # response = results.response.read().decode("utf-8")
-    # if not response.strip():  # Check if response is empty
-    #     print("Error: Received an empty response from Wikidata.")
-    # else:
-    #     with open("wikidata_response.json", "w", encoding="utf-8") as file:
-    #         file.write(response)  # Save the response for inspection
-    #     print("Raw response saved to wikidata_response.json")
 
     results_converted = results.convert()
-    # utils.print_nested_dict(results_converted)
-
-
-    # Convert to DataFrame
+    
     data = [(r["entityLabel"]["value"], r["entity"]["value"]) for r in results_converted["results"]["bindings"]]
     df = pd.DataFrame(data, columns=["Entity", "Wikidata URL"])
     print(df)
@@ -412,11 +384,8 @@ if __name__ == '__main__':
     if WRITE_XLSX:
         filtered_data = list(set(row[0] for row in data if is_valid_label(row[0])))
 
-        # Convert to DataFrame
-        # df = pd.DataFrame(data, columns=["Entity", "Wikidata URL"])
         df_filtered = pd.DataFrame(filtered_data, columns=["Entity"])
 
-        # Save to Excel
         file_path = f'{CATEGORY.lower()}_{CULTURE.lower()}.xlsx' 
         df_filtered.to_excel(file_path, index=False)
 

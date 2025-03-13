@@ -19,25 +19,14 @@ def sft_finetune(config: SFTConfig):
         os.makedirs(config.sft_adapter_save_path)
         print(f"Directory {config.sft_adapter_save_path} created")
 
-    # Load dataset
     train_dataset = load_dataset("json", data_files=config.sft_dataset_path, split="train")
 
-    base_model, tokenizer = utils.load_model_and_tokenizer(config.huggingface_model_name, casual_lm=LlamaForCausalLM)
+    base_model, tokenizer = utils.load_model_and_tokenizer(config.huggingface_model_name, 
+                                                           adapter_path=config.adapter_path_to_load,
+                                                           casual_lm=config.casual_lm)
 
-    # Configure LoRA
-    # peft_config = LoraConfig(
-    #     r=config.lora_config.r,
-    #     lora_alpha=config.lora_config.alpha,
-    #     lora_dropout=config.lora_config.dropout,
-    #     target_modules=["q_proj", "v_proj"],
-    #     bias="none",
-    #     task_type="CAUSAL_LM",
-    # )
-
-    # Training arguments
     training_args = config.training_args
 
-    # Initialize trainer
     trainer = SFTTrainer(
         model=base_model,
         train_dataset=train_dataset,
@@ -46,10 +35,8 @@ def sft_finetune(config: SFTConfig):
         args=training_args,
     )
 
-    # Start training
     trainer.train()
 
-    # Save the final model
     trainer.model.save_pretrained(config.sft_adapter_save_path)
     trainer.processing_class.save_pretrained(config.sft_adapter_save_path)
     print(f"Model and tokenizer saved to {config.sft_adapter_save_path}")
