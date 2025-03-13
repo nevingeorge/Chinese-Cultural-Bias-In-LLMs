@@ -88,7 +88,7 @@ def load_model(model_type, model_path):
 
 def main():
     parser = argparse.ArgumentParser(description='Evaluate a language model on QA pairs')
-    parser.add_argument('--qa_file', type=str, default='../data/WVQ_China_Evaluate.jsonl', help='Path to JSONL file containing QA pairs')
+    parser.add_argument('--qa_file', type=str, default='../../data/WVS/WVQ_China_Evaluate.jsonl', help='Path to JSONL file containing QA pairs')
     parser.add_argument('--model_type', type=str, default='huggingface', choices=['huggingface', 'local'],
                       help='Type of model to load (huggingface or local)')
     parser.add_argument('--model_path', type=str, default='meta-llama/Llama-3.2-1B-Instruct',

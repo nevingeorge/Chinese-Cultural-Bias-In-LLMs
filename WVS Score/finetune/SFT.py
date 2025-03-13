@@ -11,7 +11,7 @@ from peft import LoraConfig
 from trl import SFTTrainer
 
 base_model = 'meta-llama/Llama-3.2-1B-Instruct'
-dataset = load_dataset("json", data_files="../data/WVQ_China_Train.jsonl", split="train")
+dataset = load_dataset("json", data_files="../../data/WVS/WVQ_China_Train.jsonl", split="train")
 
 max_memory = {i: '46000MB' for i in range(torch.cuda.device_count())}
 model = LlamaForCausalLM.from_pretrained(
