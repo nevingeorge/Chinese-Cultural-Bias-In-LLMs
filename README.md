@@ -10,4 +10,4 @@ Our best models after hyperparameter optimization are in the models folder. To r
 
 To evaluate the WVS score of a model, from within `WVS Score/evaluate` run 
 
-    python evaluate_WVS_score.py --qa_file [path to JSONL data file] --model_type ['huggingface' or 'local'] --model_path [path to model]
+    python evaluate_WVS_score.py --qa_file [path to JSONL data file] --model_type ['huggingface' or 'local'] --model_path [model path]
